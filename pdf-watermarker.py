@@ -2,33 +2,34 @@ from logging import error
 import img2pdf
 import PyPDF2
 from sys import argv
-from fpdf import FPDF
 import os
+from typing import Tuple
 from local_vars import DEFAULT_WATERMARK_PATH
-INPUT_INDEX = 1
-OUTPUT_INDEX = 2
-WATERMARK_FILE_INPUT_INDEX = 3
+DEFAULT_PDF_INDEX = 1
+DEFAULT_OUTPUT_INDEX = 2
+DEFUALT_OUTPUT_NAME = "output.pdf"
+DEFAULT_WATERMARK_INDEX = 3
 DESKTOP_PATH = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
 TMP_PDF = "temporary_file_671823476598176591.pdf"
-DEFUALT_OUTPUT_NAME = "output.pdf"
 
 
-def apply_watermark(pdf_file, output_file, watermark):
+def apply_watermark(pdf_path: str, output_path: str, watermark_path: str) -> None:
     def picture_to_pdf(path: str) -> PyPDF2.PdfFileReader:
         with open(TMP_PDF, "wb") as f:
             f.write(img2pdf.convert(path))
             return PyPDF2.PdfFileReader(TMP_PDF)
 
-    def delete_file(path):
+    def delete_file(path: str) -> None:
         os.remove(path)
 
-    watermark_file = open(watermark, 'rb')
-    watermark_page = picture_to_pdf(watermark).getPage(0)
-    input_file = open(pdf_file, 'rb')
+    watermark_file = open(watermark_path, 'rb')
+    watermark_page = picture_to_pdf(watermark_path).getPage(0)
+    input_file = open(pdf_path, 'rb')
     input_pdf = PyPDF2.PdfFileReader(input_file)
     output = PyPDF2.PdfFileWriter()
-    result = open(output_file, 'wb')
+    result = open(output_path, 'wb')
     for i in range(input_pdf.numPages):
+        print(f"Page {i+1} / {input_pdf.numPages}")
         page = input_pdf.getPage(i)
         page.mergePage(watermark_page,)
         output.addPage(page)
@@ -41,11 +42,16 @@ def apply_watermark(pdf_file, output_file, watermark):
 
 
 def is_input_valid(pdf_file, output_file, watermark):
+    def is_file_type(path: str, ext: str):
+        return path.endswith(ext)
     if not os.path.exists(pdf_file):
         error(f"File \"{pdf_file}\" does not exist")
         return False
     if not os.path.exists(watermark):
         error(f"File \"{watermark}\" does not exist")
+        return False
+    if not is_file_type(watermark, ".png"):
+        error(f"Watermark file must be a png file")
         return False
     elif os.path.exists(output_file):
         error(f"File \"{output_file}\" already exists")
@@ -53,14 +59,14 @@ def is_input_valid(pdf_file, output_file, watermark):
     return True
 
 
-def parse_input(argv):
-    pdf_file = argv[INPUT_INDEX]
+def parse_input(argv: list[str]) -> Tuple[str, str, str]:
+    pdf_file = argv[DEFAULT_PDF_INDEX]
     watermark = DEFAULT_WATERMARK_PATH
     output_file = DESKTOP_PATH+"//"+DEFUALT_OUTPUT_NAME
     if len(argv) >= 3:
-        watermark = argv[WATERMARK_FILE_INPUT_INDEX]
+        watermark = argv[DEFAULT_WATERMARK_INDEX]
     if (len(argv) >= 4):
-        output_file = argv[OUTPUT_INDEX]
+        output_file = argv[DEFAULT_OUTPUT_INDEX]
     return pdf_file, output_file, watermark
 
 
