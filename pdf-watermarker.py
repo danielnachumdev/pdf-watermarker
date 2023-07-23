@@ -4,11 +4,13 @@ import PyPDF2
 from sys import argv
 import os
 from typing import Tuple
-from local_vars import DEFAULT_WATERMARK_PATH
-DEFAULT_PDF_INDEX = 1
-DEFAULT_OUTPUT_INDEX = 2
+DEFAULT_WATERMARK_PATH = "./watermark.png"
+try:
+    from LOCALS import DEFAULT_WATERMARK_PATH
+except:
+    pass
+
 DEFAULT_OUTPUT_NAME = "output.pdf"
-DEFAULT_WATERMARK_INDEX = 3
 DESKTOP_PATH = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
 TMP_PDF = "temporary_file_671823476598176591.pdf"
 
@@ -44,6 +46,9 @@ def is_input_valid(pdf_file, output_file, watermark):
     if not os.path.exists(pdf_file):
         error(f"File \"{pdf_file}\" does not exist")
         return False
+    if not is_file_type(pdf_file, ".pdf"):
+        error(f"\"{pdf_file}\" is of the wrong type, expected .pdf")
+        return False
     if not os.path.exists(watermark):
         error(f"File \"{watermark}\" does not exist")
         return False
@@ -57,13 +62,17 @@ def is_input_valid(pdf_file, output_file, watermark):
 
 
 def parse_input(argv: list[str]) -> Tuple[str, str, str]:
+    DEFAULT_PDF_INDEX = 1
+    DEFAULT_OUTPUT_INDEX = 2
+    DEFAULT_WATERMARK_INDEX = 3
+    DEFAULT_OUTPUT = DESKTOP_PATH+"//"+DEFAULT_OUTPUT_NAME
     pdf_file = argv[DEFAULT_PDF_INDEX]
     watermark = DEFAULT_WATERMARK_PATH
-    output_file = DESKTOP_PATH+"//"+DEFAULT_OUTPUT_NAME
-    if len(argv) >= 3:
-        watermark = argv[DEFAULT_WATERMARK_INDEX]
-    if (len(argv) >= 4):
+    output_file = DEFAULT_OUTPUT
+    if (len(argv) >= 3):
         output_file = argv[DEFAULT_OUTPUT_INDEX]
+    if len(argv) >= 4:
+        watermark = argv[DEFAULT_WATERMARK_INDEX]
     return pdf_file, output_file, watermark
 
 

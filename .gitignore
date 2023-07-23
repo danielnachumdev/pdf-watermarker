@@ -1,8 +1,7 @@
 */
-local_vars.py
+LOCALS.py
 *.spec
 *.bat
-.vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json

@@ -1,2 +1,2 @@
-img2pdf
- PyPDF2
+img2pdf==0.4.4
+ PyPDF2==2.12.1
